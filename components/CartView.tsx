@@ -26,6 +26,9 @@ interface ItemData {
    ──────────────────────────────────────────────────────────*/
 function PaymentMethod({
   onCheckout,
+  discountCode,
+  onDiscountChange,
+  discountError,
 }: {
   onCheckout: (address: {
     name: string;
@@ -35,6 +38,9 @@ function PaymentMethod({
     state: string;
     zipcode: string;
   }) => Promise<void>;
+  discountCode: string;
+  onDiscountChange: (code: string) => void;
+  discountError: string;
 }) {
   const [address, setAddress] = useState<{
     name: string;
@@ -127,6 +133,25 @@ function PaymentMethod({
           </div>
         ))}
       </div>
+
+      {/* Discount Code Input */}
+      <div className="grid gap-1 mt-2">
+        <Label htmlFor="discountCode">Discount Code</Label>
+        <Input
+          id="discountCode"
+          placeholder="Enter discount code (e.g., SAVE20)"
+          value={discountCode}
+          onChange={(e) => onDiscountChange(e.target.value)}
+          className={clsx(
+            "bg-white",
+            discountError ? "border-red-500" : ""
+          )}
+        />
+        {discountError && (
+          <span className="text-sm text-red-600">{discountError}</span>
+        )}
+      </div>
+
       <Button className="w-full mt-2" onClick={validateAndCheckout}>
         Checkout
       </Button>
@@ -151,6 +176,11 @@ export default function CartView() {
   const [productData, setProductData] = useState<Record<number, ItemData>>({});
   const [loading, setLoading] = useState(true);
 
+  /* 3️⃣  Discount code state */
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountError, setDiscountError] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
+
   /* Fetch data for each product in cart */
   useEffect(() => {
     const fetchAll = async () => {
@@ -172,10 +202,34 @@ export default function CartView() {
     else setLoading(false);
   }, [cartItems]);
 
-  const total = cartItems.reduce(
+  /* Handle discount code changes */
+  const handleDiscountChange = (code: string) => {
+    setDiscountCode(code);
+    setDiscountError("");
+
+    // Validate and apply discount
+    if (code.toUpperCase() === "SAVE20") {
+      setAppliedDiscount(0.2); // 20% discount
+      setDiscountError("");
+    } else if (code === "") {
+      setAppliedDiscount(0);
+      setDiscountError("");
+    } else {
+      setAppliedDiscount(0);
+      setDiscountError("Invalid discount code");
+    }
+  };
+
+  const subtotal = cartItems.reduce(
     (sum, it) => sum + (productData[it.id]?.priceUSD || 0) * it.quantity,
     0
   );
+
+  // 🐛 BUG: This should subtract the discount (multiply by 0.8 for 20% off)
+  // but instead it ADDS the discount percentage to the total!
+  const total = appliedDiscount > 0
+    ? subtotal * (1 + appliedDiscount)  // ❌ Should be (1 - appliedDiscount)
+    : subtotal;
 
   const handleCheckout = async (addr: {
     name: string;
@@ -297,14 +351,31 @@ export default function CartView() {
               })
             )}
           </div>
-          <div className="mt-8 px-2 text-xl flex justify-between">
-            <span className="text-stone-600 font-medium">Total</span>
-            <span className="text-stone-800">${total.toFixed(2)}</span>
+          <div className="mt-8 px-2 flex flex-col gap-2">
+            <div className="flex justify-between text-base">
+              <span className="text-stone-600">Subtotal</span>
+              <span className="text-stone-800">${subtotal.toFixed(2)}</span>
+            </div>
+            {appliedDiscount > 0 && (
+              <div className="flex justify-between text-base text-green-600">
+                <span>Discount ({(appliedDiscount * 100).toFixed(0)}%)</span>
+                <span>-${(subtotal * appliedDiscount).toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-xl font-semibold border-t pt-2">
+              <span className="text-stone-800">Total</span>
+              <span className="text-stone-800">${total.toFixed(2)}</span>
+            </div>
           </div>
         </div>
 
         <div className="lg:w-1/3">
-          <PaymentMethod onCheckout={handleCheckout} />
+          <PaymentMethod
+            onCheckout={handleCheckout}
+            discountCode={discountCode}
+            onDiscountChange={handleDiscountChange}
+            discountError={discountError}
+          />
         </div>
       </div>
     </div>
