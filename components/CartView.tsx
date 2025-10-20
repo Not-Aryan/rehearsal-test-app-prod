@@ -211,6 +211,11 @@ export default function CartView() {
     if (code.toUpperCase() === "SAVE20") {
       setAppliedDiscount(0.2); // 20% discount
       setDiscountError("");
+      // Show success toast when valid code is applied
+      toast({
+        title: "Discount applied!",
+        description: "You saved 20% on your order",
+      });
     } else if (code === "") {
       setAppliedDiscount(0);
       setDiscountError("");
