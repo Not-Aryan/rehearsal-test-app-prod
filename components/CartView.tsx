@@ -29,6 +29,7 @@ function PaymentMethod({
   discountCode,
   onDiscountChange,
   discountError,
+  appliedDiscount,
 }: {
   onCheckout: (address: {
     name: string;
@@ -41,6 +42,7 @@ function PaymentMethod({
   discountCode: string;
   onDiscountChange: (code: string) => void;
   discountError: string;
+  appliedDiscount: number;
 }) {
   const [address, setAddress] = useState<{
     name: string;
@@ -144,13 +146,19 @@ function PaymentMethod({
           onChange={(e) => onDiscountChange(e.target.value)}
           className={clsx(
             "bg-white",
-            discountError ? "border-red-500" : ""
+            discountError ? "border-red-500" : "",
+            appliedDiscount > 0 ? "border-green-500 focus:ring-green-500" : ""
           )}
         />
         {discountError && (
           <span className="text-sm text-red-600">{discountError}</span>
         )}
-        {!discountError && !discountCode && (
+        {appliedDiscount > 0 && (
+          <span className="text-sm text-green-600">
+            ✓ Discount code applied successfully
+          </span>
+        )}
+        {!discountError && !discountCode && appliedDiscount === 0 && (
           <span className="text-xs text-stone-500">
             Try code SAVE20 for 20% off your order
           </span>
@@ -385,6 +393,7 @@ export default function CartView() {
             discountCode={discountCode}
             onDiscountChange={handleDiscountChange}
             discountError={discountError}
+            appliedDiscount={appliedDiscount}
           />
         </div>
       </div>
