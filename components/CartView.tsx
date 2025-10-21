@@ -138,7 +138,18 @@ function PaymentMethod({
 
       {/* Discount Code Input */}
       <div className="grid gap-1 mt-2">
-        <Label htmlFor="discountCode">Discount Code (Optional)</Label>
+        <div className="flex justify-between items-center">
+          <Label htmlFor="discountCode">Discount Code (Optional)</Label>
+          {appliedDiscount > 0 && (
+            <button
+              type="button"
+              onClick={() => onDiscountChange("")}
+              className="text-xs text-red-600 hover:text-red-700 underline"
+            >
+              Remove discount
+            </button>
+          )}
+        </div>
         <Input
           id="discountCode"
           placeholder="Enter discount code (e.g., SAVE20)"
