@@ -375,10 +375,18 @@ export default function CartView() {
               <span className="text-stone-800">${subtotal.toFixed(2)}</span>
             </div>
             {appliedDiscount > 0 && (
-              <div className="flex justify-between text-base text-green-600">
-                <span>Discount ({(appliedDiscount * 100).toFixed(0)}%)</span>
-                <span>-${(subtotal * appliedDiscount).toFixed(2)}</span>
-              </div>
+              <>
+                <div className="flex justify-between text-base text-green-600">
+                  <span>Discount ({(appliedDiscount * 100).toFixed(0)}%)</span>
+                  <span>-${(subtotal * appliedDiscount).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm bg-green-50 px-2 py-1 rounded">
+                  <span className="text-green-700 font-medium">You save</span>
+                  <span className="text-green-700 font-medium">
+                    ${(subtotal * appliedDiscount).toFixed(2)}
+                  </span>
+                </div>
+              </>
             )}
             <div className="flex justify-between text-xl font-semibold border-t pt-2">
               <span className="text-stone-800">Total</span>
