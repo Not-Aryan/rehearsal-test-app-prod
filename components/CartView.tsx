@@ -136,7 +136,7 @@ function PaymentMethod({
 
       {/* Discount Code Input */}
       <div className="grid gap-1 mt-2">
-        <Label htmlFor="discountCode">Discount Code</Label>
+        <Label htmlFor="discountCode">Discount Code (Optional)</Label>
         <Input
           id="discountCode"
           placeholder="Enter discount code (e.g., SAVE20)"
@@ -149,6 +149,11 @@ function PaymentMethod({
         />
         {discountError && (
           <span className="text-sm text-red-600">{discountError}</span>
+        )}
+        {!discountError && !discountCode && (
+          <span className="text-xs text-stone-500">
+            Try code SAVE20 for 20% off your order
+          </span>
         )}
       </div>
 
